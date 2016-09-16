@@ -22,6 +22,7 @@ export class LineNumbersOverlay extends DynamicViewOverlay {
 	private _lineNumbersWidth:number;
 	private _renderResult:string[];
 	private _relativeLineNumbers:boolean;
+	private _isWordWrapping:boolean;
 	private _currentLineNumber:number;
 
 	constructor(context:ViewContext) {
@@ -34,6 +35,7 @@ export class LineNumbersOverlay extends DynamicViewOverlay {
 		this._lineNumbersLeft = 0;
 		this._lineNumbersWidth = 0;
 		this._renderResult = null;
+		this._isWordWrapping = this._context.configuration.editor.wrappingInfo.wrappingColumn > 0;
 		this._context.addEventHandler(this);
 	}
 
@@ -52,13 +54,13 @@ export class LineNumbersOverlay extends DynamicViewOverlay {
 		return false;
 	}
 	public onModelLinesDeleted(e:editorCommon.IViewLinesDeletedEvent): boolean {
-		return true;
+		return false;
 	}
 	public onModelLineChanged(e:editorCommon.IViewLineChangedEvent): boolean {
-		return true;
+		return this._isWordWrapping;
 	}
 	public onModelLinesInserted(e:editorCommon.IViewLinesInsertedEvent): boolean {
-		return true;
+		return false;
 	}
 	public onCursorPositionChanged(e:editorCommon.IViewCursorPositionChangedEvent): boolean {
 		let modelPosition = this._context.model.convertViewPositionToModelPosition(e.position.lineNumber, e.position.column);
@@ -86,6 +88,9 @@ export class LineNumbersOverlay extends DynamicViewOverlay {
 		}
 		if (e.viewInfo.relativeLineNumbers) {
 			this._relativeLineNumbers = this._context.configuration.editor.viewInfo.relativeLineNumbers;
+		}
+		if (e.wrappingInfo) {
+			this._isWordWrapping = this._context.configuration.editor.wrappingInfo.wrappingColumn > 0;
 		}
 		return true;
 	}
